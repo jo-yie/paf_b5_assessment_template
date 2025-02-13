@@ -15,5 +15,11 @@ public class MySQLQueries {
     """
         SELECT COUNT(*) FROM imdb        
     """;
+
+    public static final String SQL_GET_MOVIE_BY_ID = 
+    """
+        SELECT imdb_id, revenue, budget FROM imdb
+            WHERE imdb_id = ?        
+    """;
     
 }

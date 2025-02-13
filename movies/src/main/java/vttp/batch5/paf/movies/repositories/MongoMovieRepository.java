@@ -15,6 +15,8 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Repository;
 
+import com.mongodb.BasicDBObject;
+
 import jakarta.json.JsonObject;
 import vttp.batch5.paf.movies.utils.MongoDBConstants;
 
@@ -75,7 +77,7 @@ public class MongoMovieRepository {
         doc.put("overview", jo.getString("overview"));
         doc.put("tagline", jo.getString("tagline"));
         doc.put("genres", jo.getString("genres"));
-        doc.put("imdb_rating", doc.getInteger("imdb_rating"));
+        doc.put("imdb_rating", jo.getInt("imdb_rating"));
         doc.put("imdb_votes", jo.getInt("imdb_votes"));
 
         return doc;
@@ -113,15 +115,20 @@ public class MongoMovieRepository {
         //     {
         //         $group : {
         //             _id : '$director',
-        //             movies_count : { $sum : 1 }
+        //             movies_count : { $sum : 1 }, 
+        //             imdb_ids : { $push : "$_id" }
         //         }
         //     },
+        
         //     {
         //         $sort : { movies_count : -1 }
         //     },
         //     {
         //         $limit : 5
-        //     },
+        //     }, 
+        //     {
+        //         $project : { movies_count : 1, imdb_ids : 1 }
+        //     }
         // ])
     //
     public List<Document> getProlificDirectorsFromMongo(int count) {
@@ -131,7 +138,8 @@ public class MongoMovieRepository {
         MatchOperation matchOperation = Aggregation.match(criteria);
 
         GroupOperation groupOperation = Aggregation.group("director")
-            .count().as("movies_count");
+            .count().as("movies_count")
+            .push("$_id").as("imdb_ids");
 
         SortOperation sortOperation = Aggregation.sort(Sort.Direction.DESC, "movies_count" );
 

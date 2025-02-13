@@ -12,11 +12,14 @@ import org.springframework.transaction.annotation.Transactional;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.json.Json;
+import jakarta.json.JsonArray;
+import jakarta.json.JsonArrayBuilder;
 import jakarta.json.JsonNumber;
 import jakarta.json.JsonObject;
 import jakarta.json.JsonReader;
 import jakarta.json.JsonString;
 import jakarta.json.JsonValue;
+import vttp.batch5.paf.movies.models.Director;
 import vttp.batch5.paf.movies.repositories.MongoMovieRepository;
 import vttp.batch5.paf.movies.repositories.MySQLMovieRepository;
 
@@ -176,9 +179,49 @@ public class MovieService {
 
   }
 
-  public List<Document> test() {
+  public List<Director> test() {
 
-    return mongoMovieRepository.getProlificDirectorsFromMongo(5);
+    List<Director> directors = new ArrayList<>(); 
+
+    List<Document> fromMongo = mongoMovieRepository.getProlificDirectorsFromMongo(5);
+    JsonArrayBuilder jsonArrayBuilder = Json.createArrayBuilder();
+
+    for (Document d : fromMongo) {
+      List<String> imdbIds = d.getList("imdb_ids", String.class);
+      
+      int totalRevenue = 0;
+      int totalBudget = 0;
+
+      for (String imdbId : imdbIds) {
+        Director director = mySQLMovieRepository.getProlificDirectorsFromMySQL(imdbId);
+        totalRevenue = totalRevenue + (int) director.getTotal_revenue(); 
+        totalBudget = totalBudget + (int) director.getTotal_budget();
+
+      }
+
+      Director dir = new Director(); 
+      dir.setDirector_name(d.getString("_id"));
+      dir.setMovies_count(d.getInteger("movies_count"));
+      dir.setTotal_revenue(totalRevenue);
+      dir.setTotal_budget(totalBudget);
+
+      directors.add(dir);
+
+      JsonObject jsonObject = Json.createObjectBuilder()
+        .add("director_name", dir.getDirector_name())
+        .add("movies_count", dir.getMovies_count())
+        .add("total_revenue", dir.getTotal_revenue())
+        .add("total_budget", dir.getTotal_budget())
+        .build();
+
+      jsonArrayBuilder.add(jsonObject);
+
+    }
+
+    // return jsonArrayBuilder.build();
+
+    return directors;
+
 
   }
 
