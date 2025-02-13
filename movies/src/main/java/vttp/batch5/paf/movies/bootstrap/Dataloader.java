@@ -61,8 +61,8 @@ public class Dataloader implements CommandLineRunner {
 
 
   
-
     // }
+
 
     File file = new File("../data/movies_post_2010.zip");
 
@@ -90,7 +90,6 @@ public class Dataloader implements CommandLineRunner {
     br.close();
 
     movieService.insertMovies(inputList);
-
 
 
   }

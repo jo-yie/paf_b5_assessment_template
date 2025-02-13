@@ -29,7 +29,7 @@ public class MovieService {
   private MongoMovieRepository mongoMovieRepository; 
 
   // TODO: Task 2
-  @Transactional
+  // @Transactional
   public void insertMovies(List<String> inputList) {
 
     List<JsonObject> toInsert = new ArrayList<>();
@@ -82,6 +82,7 @@ public class MovieService {
 
       }
 
+
       try {
 
         mySQLMovieRepository.batchInsertMovies(batchOf25);
@@ -92,7 +93,6 @@ public class MovieService {
         System.out.println(e.getMessage());
 
       }
-
 
     }
 

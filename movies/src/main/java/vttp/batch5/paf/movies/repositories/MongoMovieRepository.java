@@ -41,6 +41,7 @@ public class MongoMovieRepository {
     //
     public void batchInsertMovies(List<JsonObject> toInsert) {
 
+
         for (JsonObject jo : toInsert) {
 
             Document doc = JsonObjectToDocument(jo);
