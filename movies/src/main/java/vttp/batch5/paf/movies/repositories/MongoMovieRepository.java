@@ -4,7 +4,13 @@ import java.util.List;
 
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.aggregation.Aggregation;
+import org.springframework.data.mongodb.core.aggregation.GroupOperation;
+import org.springframework.data.mongodb.core.aggregation.LimitOperation;
+import org.springframework.data.mongodb.core.aggregation.MatchOperation;
+import org.springframework.data.mongodb.core.aggregation.SortOperation;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Repository;
@@ -65,7 +71,7 @@ public class MongoMovieRepository {
 
         doc.put("_id", jo.getString("imdb_id")); 
         doc.put("title", jo.getString("title")); 
-        doc.put("director", jo.get("director"));
+        doc.put("director", jo.getString("director"));
         doc.put("overview", jo.getString("overview"));
         doc.put("tagline", jo.getString("tagline"));
         doc.put("genres", jo.getString("genres"));
@@ -100,8 +106,46 @@ public class MongoMovieRepository {
     // TODO: Task 3
     // Write the native Mongo query you implement in the method in the comments
     //
-    //    native MongoDB query here
+        // db.imdb.aggregate([
+        //     {
+        //         $match : { director : { $ne : null, $ne : "" } }
+        //     },
+        //     {
+        //         $group : {
+        //             _id : '$director',
+        //             movies_count : { $sum : 1 }
+        //         }
+        //     },
+        //     {
+        //         $sort : { movies_count : -1 }
+        //     },
+        //     {
+        //         $limit : 5
+        //     },
+        // ])
     //
+    public List<Document> getProlificDirectorsFromMongo(int count) {
+
+        Criteria criteria = Criteria.where("director").ne(null).ne("");
+
+        MatchOperation matchOperation = Aggregation.match(criteria);
+
+        GroupOperation groupOperation = Aggregation.group("director")
+            .count().as("movies_count");
+
+        SortOperation sortOperation = Aggregation.sort(Sort.Direction.DESC, "movies_count" );
+
+        LimitOperation limitOperation = Aggregation.limit(count);
+
+        Aggregation pipeline = Aggregation.newAggregation(
+            matchOperation, 
+            groupOperation, 
+            sortOperation, 
+            limitOperation);
+        
+        return template.aggregate(pipeline, MongoDBConstants.C_IMDB, Document.class).getMappedResults();
+
+    }
 
 
 }

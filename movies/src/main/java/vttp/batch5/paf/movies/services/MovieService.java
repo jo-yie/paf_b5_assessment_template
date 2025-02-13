@@ -4,6 +4,7 @@ import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -165,7 +166,20 @@ public class MovieService {
   // TODO: Task 3
   // You may change the signature of this method by passing any number of parameters
   // and returning any type
-  public void getProlificDirectors() {
+  public void getProlificDirectors(int count) {
+
+    // Director name ("_id") and movies_count
+    List<Document> fromMongo = mongoMovieRepository.getProlificDirectorsFromMongo(count);
+
+
+
+
+  }
+
+  public List<Document> test() {
+
+    return mongoMovieRepository.getProlificDirectorsFromMongo(5);
+
   }
 
 

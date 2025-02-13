@@ -56,41 +56,37 @@ public class Dataloader implements CommandLineRunner {
     // count > 0 TODO 
     // configurable file path 
 
-    // if (mySQLMovieRepository.countMySQLEntries() == 0 &&
-    //   mongoMovieRepository.countMongoDBEntries() == 0) {
+    if (mySQLMovieRepository.countMySQLEntries() == 0 &&
+      mongoMovieRepository.countMongoDBEntries() == 0) {
 
+      File file = new File("../data/movies_post_2010.zip");
 
+      System.out.println(">>>>FILE EXISTS: " + file.exists());
+      ZipFile zf = new ZipFile(file);
   
-    // }
-
-
-    File file = new File("../data/movies_post_2010.zip");
-
-    System.out.println(">>>>FILE EXISTS: " + file.exists());
-    ZipFile zf = new ZipFile(file);
-
-    ZipEntry ze = zf.getEntry("movies_post_2010.json");
-    System.out.println(">>>>GET NAME OF FILE: " + ze.getName());
-    
-    InputStream is = zf.getInputStream(ze);
-
-    BufferedReader br = new BufferedReader(new InputStreamReader(is, "UTF-8"));
-
-    String input; 
-    List<String> inputList = new ArrayList<>(); 
-
-    while ((input = br.readLine()) != null) {
-
-      // process input 
-      inputList.add(input);
+      ZipEntry ze = zf.getEntry("movies_post_2010.json");
+      System.out.println(">>>>GET NAME OF FILE: " + ze.getName());
+      
+      InputStream is = zf.getInputStream(ze);
+  
+      BufferedReader br = new BufferedReader(new InputStreamReader(is, "UTF-8"));
+  
+      String input; 
+      List<String> inputList = new ArrayList<>(); 
+  
+      while ((input = br.readLine()) != null) {
+  
+        // process input 
+        inputList.add(input);
+  
+      }
+  
+      is.close();
+      br.close();
+  
+      movieService.insertMovies(inputList);
 
     }
-
-    is.close();
-    br.close();
-
-    movieService.insertMovies(inputList);
-
 
   }
 
