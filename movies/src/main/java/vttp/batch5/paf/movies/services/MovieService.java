@@ -8,7 +8,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.json.Json;
@@ -16,6 +15,7 @@ import jakarta.json.JsonNumber;
 import jakarta.json.JsonObject;
 import jakarta.json.JsonReader;
 import jakarta.json.JsonString;
+import jakarta.json.JsonValue;
 import vttp.batch5.paf.movies.repositories.MongoMovieRepository;
 import vttp.batch5.paf.movies.repositories.MySQLMovieRepository;
 
@@ -53,15 +53,48 @@ public class MovieService {
 
     }
 
+    // for toInsert 
+    // add 25 to a new list 
+    while (toInsert.size() != 0) {
+
+      List<JsonObject> batchOf25 = new ArrayList<>();
+      // int first = 0;
+
+      if (toInsert.size() < 25) {
+
+        for (int i = 0; i < toInsert.size(); i++) {
+          batchOf25.add(toInsert.get(i));
+          toInsert.remove(i);
+
+        }
+
+      }
+
+      else {
+        for (int i = 0; i < 25; i++) {
+
+          batchOf25.add(toInsert.get(i)); 
+          toInsert.remove(i);
+  
+        }
+
+        // first = first + 25;
+
+      }
+
+      try {
+
+        mySQLMovieRepository.batchInsertMovies(batchOf25);
+        mongoMovieRepository.batchInsertMovies(batchOf25);
+
+      } catch (Exception e) {
+
+        System.out.println(e.getMessage());
+
+      }
 
 
-    // insert into sql 
-    mySQLMovieRepository.batchInsertMovies(toInsert);
-
-    // insert into mongo 
-    mongoMovieRepository.batchInsertMovies(toInsert);
-
-
+    }
 
   }
 
@@ -70,7 +103,7 @@ public class MovieService {
   public JsonObject cleanJsonObject(JsonObject jo) {
 
     JsonString emptyString = Json.createValue("");
-    JsonNumber zero = Json.createValue(0);
+    JsonValue zero = (JsonValue) Json.createValue(0);
 
     String[] fields = {"title",
       "vote_average",

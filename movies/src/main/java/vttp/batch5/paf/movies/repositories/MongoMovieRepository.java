@@ -41,12 +41,18 @@ public class MongoMovieRepository {
     //
     public void batchInsertMovies(List<JsonObject> toInsert) {
 
-    for (JsonObject jo : toInsert) {
+        for (JsonObject jo : toInsert) {
 
-        Document doc = JsonObjectToDocument(jo);
-        template.insert(doc, MongoDBConstants.C_IMDB);
+            Document doc = JsonObjectToDocument(jo);
+            template.insert(doc, MongoDBConstants.C_IMDB);
+
+        }
 
     }
+
+    public void insertMovie(JsonObject toInsert) {
+
+        template.insert(JsonObjectToDocument(toInsert), MongoDBConstants.C_IMDB);
 
     }
 
