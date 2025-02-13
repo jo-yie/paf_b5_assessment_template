@@ -1,5 +1,8 @@
 package vttp.batch5.paf.movies.services;
 
+import org.springframework.stereotype.Service;
+
+@Service
 public class MovieService {
 
   // TODO: Task 2
