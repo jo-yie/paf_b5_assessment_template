@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import jakarta.json.Json;
 import jakarta.json.JsonArray;
+import net.sf.jasperreports.engine.JRException;
 import vttp.batch5.paf.movies.models.Director;
 import vttp.batch5.paf.movies.services.MovieService;
 
@@ -41,7 +42,12 @@ public class MainController {
   // }
 
   // TODO: Task 4
+  @GetMapping("/api/summary/pdf")
+  public void generatePDFReport(@RequestParam("count") int count) throws JRException {
 
+    movieService.generatePDFReport(count);
+
+  }
 
 
 }

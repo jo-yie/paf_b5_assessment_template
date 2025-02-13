@@ -1,11 +1,16 @@
 package vttp.batch5.paf.movies.services;
 
+import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.StringReader;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,6 +24,13 @@ import jakarta.json.JsonObject;
 import jakarta.json.JsonReader;
 import jakarta.json.JsonString;
 import jakarta.json.JsonValue;
+import net.sf.jasperreports.engine.JRException;
+import net.sf.jasperreports.engine.JasperExportManager;
+import net.sf.jasperreports.engine.JasperFillManager;
+import net.sf.jasperreports.engine.JasperPrint;
+import net.sf.jasperreports.engine.JasperReport;
+import net.sf.jasperreports.engine.util.JRLoader;
+import net.sf.jasperreports.json.data.JsonDataSource;
 import vttp.batch5.paf.movies.models.Director;
 import vttp.batch5.paf.movies.repositories.MongoMovieRepository;
 import vttp.batch5.paf.movies.repositories.MySQLMovieRepository;
@@ -215,13 +227,77 @@ public class MovieService {
 
   }
 
+  public JsonArray test(int count) {
 
+    List<Director> directors = new ArrayList<>(); 
+
+    List<Document> fromMongo = mongoMovieRepository.getProlificDirectorsFromMongo(count);
+    JsonArrayBuilder jsonArrayBuilder = Json.createArrayBuilder();
+
+    for (Document d : fromMongo) {
+      List<String> imdbIds = d.getList("imdb_ids", String.class);
+      
+      int totalRevenue = 0;
+      int totalBudget = 0;
+
+      for (String imdbId : imdbIds) {
+        Director director = mySQLMovieRepository.getProlificDirectorsFromMySQL(imdbId);
+        totalRevenue = totalRevenue + (int) director.getTotal_revenue(); 
+        totalBudget = totalBudget + (int) director.getTotal_budget();
+
+      }
+
+      Director dir = new Director(); 
+      dir.setDirector_name(d.getString("_id"));
+      dir.setMovies_count(d.getInteger("movies_count"));
+      dir.setTotal_revenue(totalRevenue);
+      dir.setTotal_budget(totalBudget);
+
+      directors.add(dir);
+
+      JsonObject jsonObject = Json.createObjectBuilder()
+        .add("director_name", dir.getDirector_name())
+        .add("movies_count", dir.getMovies_count())
+        .add("total_revenue", dir.getTotal_revenue())
+        .add("total_budget", dir.getTotal_budget())
+        .build();
+
+      jsonArrayBuilder.add(jsonObject);
+
+    }
+
+    return jsonArrayBuilder.build();
+
+  }
 
 
   // TODO: Task 4
   // You may change the signature of this method by passing any number of parameters
   // and returning any type
-  public void generatePDFReport() {
+  public void generatePDFReport(int count) throws JRException {
+
+    String rawJson = "{\"name\":\"Leong Jo Yie\", \"batch\":\"A\"}";
+
+    // create overall report JSON data source
+    ByteArrayInputStream bais = new ByteArrayInputStream(rawJson.getBytes());
+    JsonDataSource reportDS = new JsonDataSource(bais);
+
+    // create the director table JSON data source --> Json Array 
+    ByteArrayInputStream bais2 = new ByteArrayInputStream(getProlificDirectors(count).toString().getBytes());
+    JsonDataSource directorDS = new JsonDataSource(bais2);
+
+    // create the report's parameters
+    Map<String, Object> params = new HashMap<>(); 
+    params.put("DIRECTOR_TABLE_DATASET", directorDS); 
+
+    // load the report 
+    JasperReport report = (JasperReport) JRLoader.loadObject(new File("../data/director_movies_report.jasper"));
+
+    // populate the report with the JSON data osurces 
+    JasperPrint print = JasperFillManager.fillReport(report, params, reportDS); 
+
+    // generate the report as a PDF 
+    JasperExportManager.exportReportToPdf(print);
 
   }
 
