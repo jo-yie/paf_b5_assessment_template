@@ -28,7 +28,7 @@ public class MainController {
   public ResponseEntity<List<Director>> getSummary(@RequestParam("count") int count) {
 
     return ResponseEntity.ok()
-      .body(movieService.test());
+      .body(movieService.getProlificDirectors(count));
 
   }
 

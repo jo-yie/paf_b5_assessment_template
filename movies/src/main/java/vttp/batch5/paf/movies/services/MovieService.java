@@ -169,21 +169,11 @@ public class MovieService {
   // TODO: Task 3
   // You may change the signature of this method by passing any number of parameters
   // and returning any type
-  public void getProlificDirectors(int count) {
-
-    // Director name ("_id") and movies_count
-    List<Document> fromMongo = mongoMovieRepository.getProlificDirectorsFromMongo(count);
-
-
-
-
-  }
-
-  public List<Director> test() {
+  public List<Director> getProlificDirectors(int count) {
 
     List<Director> directors = new ArrayList<>(); 
 
-    List<Document> fromMongo = mongoMovieRepository.getProlificDirectorsFromMongo(5);
+    List<Document> fromMongo = mongoMovieRepository.getProlificDirectorsFromMongo(count);
     JsonArrayBuilder jsonArrayBuilder = Json.createArrayBuilder();
 
     for (Document d : fromMongo) {
@@ -224,6 +214,8 @@ public class MovieService {
 
 
   }
+
+
 
 
   // TODO: Task 4
